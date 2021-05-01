@@ -18,8 +18,18 @@ def train_test_validation_split(X, y, test_percentage, validation_percentage, ra
     return X_train, X_test, X_val, y_train, y_test, y_val
 
 
-def preprocessDataframe(data):
+def preprocessDataframe(data, balanceDataClasses=True):
     data = removeUselessColumns(data)
+
+    print("Values per class: \n", data['genre'].value_counts())
+    print("Number of instances: ", len(data.index))
+
+    if balanceDataClasses:
+        data = balanceDataframe(data)
+        print("Values per class (after oversampling): \n", data['genre'].value_counts())
+        print("Number of instances (after oversampling): ", len(data.index))
+
+
 
     # Séparation des données et des labels
     X = data.loc[:, data.columns != 'genre']
@@ -49,6 +59,19 @@ def encodeCategoricalAttributes(X):
     X = pd.get_dummies(X, columns=["key", "time_signature"])
 
     return X
+
+def balanceDataframe(X):
+
+    max_size = X['genre'].value_counts().max()
+
+    lst = [X]
+    for class_index, group in X.groupby('genre'):
+        lst.append(group.sample(max_size-len(group), replace=True))
+    X_new = pd.concat(lst)
+
+    X_new = X_new.reset_index(drop=True)
+
+    return X_new
 
 def scaleNumericalAttributes(X):
     # Mise a l'echelle des attributs

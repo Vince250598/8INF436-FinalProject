@@ -1,20 +1,19 @@
 import pandas as pd
 import numpy as np
-from sklearn.cluster import KMeans
+from sklearn.cluster import DBSCAN
 from sklearn.model_selection import train_test_split
 
 import utilPerformanceComputation
-
 from DataframePreprocessor import preprocessDataframe
 from DisplayTools import showClassificationPerformances
 from SupervisedLearning import applySupervisedModel
 
 
-def trainAndTestKmeansModel(data, random_state, n_clusters, n_init, max_iter, tol):
+def trainAndTestDBSCANModel(data, random_state, eps, min_samples):
     # Do all preprocessing operations on dataframe and return the features (X) and the labels (y)
     X, y = preprocessDataframe(data)
 
-    clusters = apply_KMeans(X, random_state, n_clusters, n_init, max_iter, tol)
+    clusters = applyDBSCAN(X, eps, min_samples)
 
     # Split data with 70% of train data and 30% of test data, the labels are the clusters in which the instances were grouped by the clustering algorithm
     X_train, X_test, y_train, y_test = train_test_split(X, clusters, test_size=0.3, random_state=random_state)
@@ -37,42 +36,20 @@ def trainAndTestKmeansModel(data, random_state, n_clusters, n_init, max_iter, to
     # Prints different performance metrics for a multiclass model
     performances = utilPerformanceComputation.Performances()
     cm = utilPerformanceComputation.compute_performances_for_multiclass(result['genre'], result['predicted'],
-                                                                   class_names, performances)
+                                                                        class_names, performances)
     return average_precision, cm.cohen_kappa_score, cm.weighted_precision, cm.weighted_recall, cm.weighted_f1_score, cm.matthews_corrcoef
 
 
-def apply_KMeans(X, random_state, n_clusters, n_init, max_iter, tol):
+def applyDBSCAN(X, eps, min_samples):
+    leaf_size = 30
+    n_jobs = -1
 
-    kmeans = KMeans(n_clusters=n_clusters, n_init=n_init, max_iter=max_iter, tol=tol, random_state=random_state)
-    kmeans.fit(X)
+    db = DBSCAN(eps=eps, min_samples=min_samples, leaf_size=leaf_size, n_jobs=n_jobs)
 
-    clusters = kmeans.predict(X)
+    clusters = db.fit_predict(X)
     clusters = pd.DataFrame(data=clusters, index=X.index, columns=['cluster'])
 
     # cluster number from int to string
     clusters['cluster'] = clusters['cluster'].apply(str)
 
     return clusters
-
-    '''n_init = 10
-    max_iter = 300
-    tol = 0.0001
-
-    kMeans_inertia = pd.DataFrame(data=[], index=range(2, 21), columns=['inertia'])
-
-    for n_clusters in range(2, 25):
-        print("Testing with " + str(n_clusters) + " clusters")
-        kmeans = KMeans(n_clusters=n_clusters, n_init=n_init, max_iter=max_iter, tol=tol, random_state=random_state)
-        kmeans.fit(X)
-        kMeans_inertia.loc[n_clusters] = kmeans.inertia_
-
-        X_train_kmeansClustered = kmeans.predict(X)
-        X_train_kmeansClustered = pd.DataFrame(data=X_train_kmeansClustered, index=X.index, columns=['cluster'])
-
-        print(X_train_kmeansClustered)
-        
-    
-
-    kMeans_inertia.plot()
-    plt.show()'''
-

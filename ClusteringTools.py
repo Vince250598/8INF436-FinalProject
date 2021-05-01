@@ -1,4 +1,5 @@
 import pandas as pd
+import matplotlib.pyplot as plt
 
 def analyzeCluster(clusterDF, labelsDF):
     countByCluster = pd.DataFrame(data=clusterDF['cluster'].value_counts())
@@ -14,3 +15,16 @@ def analyzeCluster(clusterDF, labelsDF):
     overallAccuracy = accuracyDF.countMostFrequent.sum() / accuracyDF.clusterCount.sum()
     accuracyByLabel = accuracyDF.countMostFrequent / accuracyDF.clusterCount
     return countByCluster, countByLabel, countMostFreq, accuracyDF, overallAccuracy, accuracyByLabel
+
+def showClusterDistribution(X_train, trainedModelLabels, clusterNumber, *attributes):
+    cluster_map = pd.DataFrame()
+    cluster_map['data_index'] = X_train.index.values
+    cluster_map['cluster'] = trainedModelLabels
+    chosenClusterindexes = cluster_map[cluster_map.cluster == clusterNumber]
+    chosenCluster = X_train.loc[chosenClusterindexes.data_index]
+    for attribute in attributes:
+        chosenCluster[attribute].plot(kind='hist', title='Distribution of ' + str(attribute) + ' in cluster ' + str(clusterNumber))
+        #chosenCluster.hist(column=attribute)
+
+    plt.show()
+
