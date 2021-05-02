@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.model_selection import train_test_split
+import matplotlib.pyplot as plt
 
 import utilPerformanceComputation
 
@@ -37,12 +38,11 @@ def trainAndTestKmeansModel(data, random_state, n_clusters, n_init, max_iter, to
     # Prints different performance metrics for a multiclass model
     performances = utilPerformanceComputation.Performances()
     cm = utilPerformanceComputation.compute_performances_for_multiclass(result['genre'], result['predicted'],
-                                                                   class_names, performances)
+                                                                        class_names, performances)
     return average_precision, cm.cohen_kappa_score, cm.weighted_precision, cm.weighted_recall, cm.weighted_f1_score, cm.matthews_corrcoef
 
 
 def apply_KMeans(X, random_state, n_clusters, n_init, max_iter, tol):
-
     kmeans = KMeans(n_clusters=n_clusters, n_init=n_init, max_iter=max_iter, tol=tol, random_state=random_state)
     kmeans.fit(X)
 
@@ -54,7 +54,9 @@ def apply_KMeans(X, random_state, n_clusters, n_init, max_iter, tol):
 
     return clusters
 
-    '''n_init = 10
+
+def printInertiaPlot(X, random_state):
+    n_init = 10
     max_iter = 300
     tol = 0.0001
 
@@ -70,9 +72,6 @@ def apply_KMeans(X, random_state, n_clusters, n_init, max_iter, tol):
         X_train_kmeansClustered = pd.DataFrame(data=X_train_kmeansClustered, index=X.index, columns=['cluster'])
 
         print(X_train_kmeansClustered)
-        
-    
 
     kMeans_inertia.plot()
-    plt.show()'''
-
+    plt.show()

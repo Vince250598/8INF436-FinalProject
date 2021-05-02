@@ -22,13 +22,13 @@ def find_distance_thres(n_clusters, Z, X):
 
     return distance_threshold
 
+
 def applyHierarchicalClustering(X, n_clusters):
     Z = fastcluster.linkage_vector(X, method='ward',
                                    metric='euclidean')
 
     Z_dataFrame = pd.DataFrame(data=Z, columns=['clusterOne',
                                                 'clusterTwo', 'distance', 'newClusterSize'])
-
 
     distance = find_distance_thres(n_clusters, Z, X)
 
@@ -40,6 +40,7 @@ def applyHierarchicalClustering(X, n_clusters):
     clusters['cluster'] = clusters['cluster'].apply(str)
 
     return clusters
+
 
 def trainAndTestHierModel(data, random_state, n_clusters):
     # Do all preprocessing operations on dataframe and return the features (X) and the labels (y)
@@ -68,7 +69,5 @@ def trainAndTestHierModel(data, random_state, n_clusters):
     # Prints different performance metrics for a multiclass model
     performances = utilPerformanceComputation.Performances()
     cm = utilPerformanceComputation.compute_performances_for_multiclass(result['genre'], result['predicted'],
-                                                                   class_names, performances)
+                                                                        class_names, performances)
     return average_precision, cm.cohen_kappa_score, cm.weighted_precision, cm.weighted_recall, cm.weighted_f1_score, cm.matthews_corrcoef
-
-

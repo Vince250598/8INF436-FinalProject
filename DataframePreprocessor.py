@@ -1,21 +1,5 @@
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.preprocessing import StandardScaler
 import pandas as pd
-
-
-# La somme de train_percentage, test_percentage et validation_percentage doit être égale à 1
-def train_test_validation_split(X, y, test_percentage, validation_percentage, random_state):
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=test_percentage, random_state=random_state,
-                                                        stratify=y)
-
-    train_percentage = 1 - (validation_percentage + test_percentage)
-
-    validation_size = validation_percentage / (validation_percentage + train_percentage)
-
-    X_train, X_val, y_train, y_val = train_test_split(X_train, y_train, test_size=validation_size,
-                                                      random_state=random_state, stratify=y_train)
-
-    return X_train, X_test, X_val, y_train, y_test, y_val
 
 
 def preprocessDataframe(data, balanceDataClasses=True):
@@ -28,8 +12,6 @@ def preprocessDataframe(data, balanceDataClasses=True):
         data = balanceDataframe(data)
         print("Values per class (after oversampling): \n", data['genre'].value_counts())
         print("Number of instances (after oversampling): ", len(data.index))
-
-
 
     # Séparation des données et des labels
     X = data.loc[:, data.columns != 'genre']
@@ -54,30 +36,34 @@ def removeUselessColumns(data):
     data = data.drop(['type'], axis=1)
 
     return data
-def encodeCategoricalAttributes(X):
 
+
+def encodeCategoricalAttributes(X):
     X = pd.get_dummies(X, columns=["key", "time_signature"])
 
     return X
 
-def balanceDataframe(X):
 
+# Oversampling
+def balanceDataframe(X):
     max_size = X['genre'].value_counts().max()
 
     lst = [X]
     for class_index, group in X.groupby('genre'):
-        lst.append(group.sample(max_size-len(group), replace=True))
+        lst.append(group.sample(max_size - len(group), replace=True))
     X_new = pd.concat(lst)
 
     X_new = X_new.reset_index(drop=True)
 
     return X_new
 
+
 def scaleNumericalAttributes(X):
     # Mise a l'echelle des attributs
     scaled_features = X.copy()
 
-    attributesToScale = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness', 'liveness', 'valence', 'tempo', 'duration_ms']
+    attributesToScale = ['danceability', 'energy', 'loudness', 'speechiness', 'acousticness', 'instrumentalness',
+                         'liveness', 'valence', 'tempo', 'duration_ms']
     features = scaled_features[attributesToScale]
 
     scaler = StandardScaler()
